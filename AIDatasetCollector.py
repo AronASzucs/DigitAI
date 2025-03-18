@@ -1,9 +1,14 @@
 import time
-import tkinter as tk 
+import tkinter as tk
+import numpy
+from PIL import Image
+import os, os.path
 
 # The AI Dataset collection class
-class AIDataSetCollection:
+class AIDatasetCollector:
+
     def __init__(self, root):
+
         self.imageDimensions = 16
         self.root = root
         self.fontSize = 20
@@ -12,10 +17,14 @@ class AIDataSetCollection:
         
         self.setupWindow()
         self.createWidgets()
+        self.updateImagesInDirectory()
 
         self.root.bind("<r>", self.reset)
-
+        self.root.bind("<s>", self.saveImg)
         self.drawingCanvas.bind("<B1-Motion>", self.mouseDrag)
+
+        # define array
+        self.array = numpy.zeros((self.imageDimensions, self.imageDimensions))
 
     def setupWindow(self):
         self.root.geometry("512x512")
@@ -60,22 +69,42 @@ class AIDataSetCollection:
 
     def canvasDraw(self, x, y):
         if (x >= 0 and y >= 0 and x <= self.imageDimensions and y <= self.imageDimensions):
-            self.drawingCanvas.create_rectangle(x * (256 / self.imageDimensions), y * (256 / self.imageDimensions), (x * (256 / self.imageDimensions) + (256 / self.imageDimensions)), (y * (256 / self.imageDimensions) + (256 / self.imageDimensions)), fill = "black") 
+            self.drawingCanvas.create_rectangle(x * (256 // self.imageDimensions), y * (256 // self.imageDimensions), (x * (256 // self.imageDimensions) + (256 // self.imageDimensions)), (y * (256 // self.imageDimensions) + (256 // self.imageDimensions)), fill = "black") 
+            self.array[y,x] = 1
 
     def mouseDrag(self, event):
         x, y = event.x, event.y
-        self.canvasDraw(x // (256 / self.imageDimensions) , y // (256 / self.imageDimensions))
-        print (str(x // (256 / self.imageDimensions)) + " " + str(y // (256 / self.imageDimensions)))
+        self.canvasDraw(x // (256 // self.imageDimensions) , y // (256 // self.imageDimensions))
+        print (str(x // (256 // self.imageDimensions)) + " " + str(y // (256 // self.imageDimensions)))
 
     def reset(self, event):
         time.sleep(0.1)
         self.drawingCanvas.delete("all")
+        self.array = numpy.zeros((self.imageDimensions, self.imageDimensions))
+
+    def saveImg(self, event):
+        image = Image.fromarray((self.array * 255).astype(numpy.uint8))
+
+        file_path = "dataset/" + str(self.currentNum) + "/num" + str(self.currentNum) + "count" + str(self.image_count) + ".png"
+        image.save(file_path)
+
+        self.reset(self)
+
+    def updateImagesInDirectory(self):
+        file_path = "dataset/" + str(self.currentNum) + "/"
+
+        # idk why this works I found it on stack overflow
+        self.image_count = len(os.listdir(file_path))
+
+        self.numInDirectoryButton.config(text="Images in directory: " + str(self.image_count))
+
+        self.root.after(100, self.updateImagesInDirectory)
 
 # create main window
 root = tk.Tk()
 
 # instantiate the app
-app = AIDataSetCollection(root)
+app = AIDatasetCollector(root)
 
 # start the main loop
 root.mainloop()
