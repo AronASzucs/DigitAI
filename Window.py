@@ -1,79 +1,81 @@
+import time
 import tkinter as tk 
 
-fontSize = 20
-currentNum = 0
-imagecount = 0
+# The AI Dataset collection class
+class AIDataSetCollection:
+    def __init__(self, root):
+        self.imageDimensions = 16
+        self.root = root
+        self.fontSize = 20
+        self.currentNum = 0
+        self.image_count = 0
+        
+        self.setupWindow()
+        self.createWidgets()
 
-def WindowSetup():
-        # creates window
-    root = tk.Tk()
+        self.root.bind("<r>", self.reset)
 
-    # basic window info
-    root.geometry("512x512")
-    root.title("AI Dataset Collection")
-    root.resizable(False, False)
+        self.drawingCanvas.bind("<B1-Motion>", self.mouseDrag)
 
-    # label 
-    helpLabel = tk.Label(root, text = "r = reset, s = save", font = ('Arial', fontSize))
-    helpLabel.pack()
+    def setupWindow(self):
+        self.root.geometry("512x512")
+        self.root.title("AI Dataset Collector Program")
+        self.root.resizable(False, False)
 
-    currentNumLabel = tk.Label(root, text = "Current number: " + str(currentNum), font = ('Arial', 10))
-    currentNumLabel.pack()
+    def createWidgets(self):
+        # Help Info Label
+        self.helpLabel = tk.Label(self.root, text="r = reset, s = save", font=('Arial', self.fontSize))
+        self.helpLabel.pack()
+        
+        # Current Number Label
+        self.currentNumLabel = tk.Label(self.root, text="Current number: " + str(self.currentNum), font=('Arial', 10))
+        self.currentNumLabel.pack()
 
-    # input buttom frame 
-    inputButtomFrame = tk.Frame(root)
-    inputButtomFrame.columnconfigure(0,weight=1) 
-    inputButtomFrame.columnconfigure(1,weight=1)
-    inputButtomFrame.columnconfigure(2,weight=1)
-    inputButtomFrame.columnconfigure(3,weight=1)
-    inputButtomFrame.columnconfigure(4,weight=1)
+        # Configure Columns
+        self.inputButtomFrame = tk.Frame(self.root)
+        for i in range(5):
+            self.inputButtomFrame.columnconfigure(i, weight=1)
 
-    # buttons
-    button0 = tk.Button(inputButtomFrame, text = "0", font = ("Arial", fontSize), command= lambda: setCurrentNum(0))
-    button0.grid(row = 0, column= 0)
+        # Create Buttons
+        for i in range(10):
+            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda i=i: self.setCurrentNum(i))
+            button.grid(row=i // 5, column=i % 5)
 
-    button1 = tk.Button(inputButtomFrame, text = "1", font = ("Arial", fontSize), command= lambda: setCurrentNum(1))
-    button1.grid(row = 0, column= 1)
+        self.inputButtomFrame.pack()
 
-    button2 = tk.Button(inputButtomFrame, text = "2", font = ("Arial", fontSize), command= lambda: setCurrentNum(2))
-    button2.grid(row = 0, column= 2)
+        self.numInDirectoryButton = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("Arial", 10))
+        self.numInDirectoryButton.pack()
 
-    button3 = tk.Button(inputButtomFrame, text = "3", font = ("Arial", fontSize), command= lambda: setCurrentNum(3))
-    button3.grid(row = 0, column= 3)
+        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="white", borderwidth = 0, highlightthickness= 0)
+        self.drawingCanvas.pack()
 
-    button4 = tk.Button(inputButtomFrame, text = "4", font = ("Arial", fontSize), command= lambda: setCurrentNum(4))
-    button4.grid(row = 0, column= 4)
+        self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10))
+        self.signatureLabel.pack(side="bottom")
 
-    button5 = tk.Button(inputButtomFrame, text = "5", font = ("Arial", fontSize), command= lambda: setCurrentNum(5))
-    button5.grid(row = 1, column= 0)
 
-    button6 = tk.Button(inputButtomFrame, text = "6", font = ("Arial", fontSize), command= lambda: setCurrentNum(6))
-    button6.grid(row = 1, column= 1)
+    def setCurrentNum(self, num):
+        self.currentNum = num
+        # Update the current number label
+        self.currentNumLabel.config(text="Current number: " + str(self.currentNum))
 
-    button7 = tk.Button(inputButtomFrame, text = "7", font = ("Arial", fontSize), command= lambda: setCurrentNum(7))
-    button7.grid(row = 1, column= 2)
+    def canvasDraw(self, x, y):
+        if (x >= 0 and y >= 0 and x <= self.imageDimensions and y <= self.imageDimensions):
+            self.drawingCanvas.create_rectangle(x * (256 / self.imageDimensions), y * (256 / self.imageDimensions), (x * (256 / self.imageDimensions) + (256 / self.imageDimensions)), (y * (256 / self.imageDimensions) + (256 / self.imageDimensions)), fill = "black") 
 
-    button8 = tk.Button(inputButtomFrame, text = "8", font = ("Arial", fontSize), command= lambda: setCurrentNum(8))
-    button8.grid(row = 1, column= 3)
+    def mouseDrag(self, event):
+        x, y = event.x, event.y
+        self.canvasDraw(x // (256 / self.imageDimensions) , y // (256 / self.imageDimensions))
+        print (str(x // (256 / self.imageDimensions)) + " " + str(y // (256 / self.imageDimensions)))
 
-    button9 = tk.Button(inputButtomFrame, text = "9", font = ("Arial", fontSize), command= lambda: setCurrentNum(9))
-    button9.grid(row = 1, column= 4)
+    def reset(self, event):
+        time.sleep(0.1)
+        self.drawingCanvas.delete("all")
 
-    inputButtomFrame.pack()
+# create main window
+root = tk.Tk()
 
-    numInDirectoryButton = tk.Label(root, text = "Images in directory: "+ str(imagecount), font = ("Arial", 10))
-    numInDirectoryButton.pack()
+# instantiate the app
+app = AIDataSetCollection(root)
 
-    drawingCanvas = tk.Canvas(root, width = 256, height= 256, bg = "white", highlightbackground= "black")
-    drawingCanvas.pack()
-
-    signatureLabel = tk.Label(root, text = "Made by Aron Szucs", font = ("Lucida Calligraphy", 10), )
-    signatureLabel.pack(side = "bottom")
-    
-    root.mainloop()
-    
-def setCurrentNum(num):
-    global currentNum
-    currentNum = num
-
-WindowSetup()
+# start the main loop
+root.mainloop()
