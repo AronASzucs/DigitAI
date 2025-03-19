@@ -55,7 +55,7 @@ class AIDatasetCollector:
         self.numInDirectoryButton = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("Arial", 10))
         self.numInDirectoryButton.pack()
 
-        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="white", borderwidth = 0, highlightthickness= 0)
+        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="light grey", borderwidth = 0, highlightthickness= 0)
         self.drawingCanvas.pack()
 
         self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10))
