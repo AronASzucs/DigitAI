@@ -1,8 +1,10 @@
 import time
 import tkinter as tk
+import tkinter.font as tkFont
 import numpy
 from PIL import Image
 import os, os.path
+from ctypes import windll
 
 # The AI Dataset collection class
 class AIDatasetCollector:
@@ -27,13 +29,16 @@ class AIDatasetCollector:
         self.array = numpy.zeros((self.imageDimensions, self.imageDimensions))
 
     def setupWindow(self):
+        windll.shcore.SetProcessDpiAwareness(1)
         self.root.geometry("512x512")
-        self.root.title("AI Dataset Collector Program")
+        self.root.title("Handwritten Number AI collection and model")
         self.root.resizable(False, False)
+        self.root.iconbitmap("assets/Icon.ico")
+        root.configure(bg = "#2e2e2e")
 
     def createWidgets(self):
         # Help Info Label
-        self.helpLabel = tk.Label(self.root, text="r = reset, s = save", font=('Arial', self.fontSize))
+        self.helpLabel = tk.Label(self.root, text="r = reset, s = save", font=tkFont.Font(family="assets/Lexend.ttf", size=20))
         self.helpLabel.pack()
         
         # Current Number Label
@@ -58,7 +63,7 @@ class AIDatasetCollector:
         self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="light grey", borderwidth = 0, highlightthickness= 0)
         self.drawingCanvas.pack()
 
-        self.trainModelButton = tk.Button(self.root, text= "Train Model", font=("Arial", 10))
+        self.trainModelButton = tk.Button(self.root, text= "Train Model", font=("Arial", self.fontSize))
         self.trainModelButton.pack(pady = 10)
 
         self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10))
