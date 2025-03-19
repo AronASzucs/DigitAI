@@ -16,6 +16,7 @@ class AIDatasetCollector:
         self.fontSize = 20
         self.currentNum = 0
         self.image_count = 0
+        self.LightOrDark = 0 # 0 = dark mode, 1 = light mode
         
         self.setupWindow()
         self.createWidgets()
@@ -32,17 +33,17 @@ class AIDatasetCollector:
         windll.shcore.SetProcessDpiAwareness(1)
         self.root.geometry("512x512")
         self.root.title("Handwritten Number AI collection and model")
-        self.root.resizable(False, False)
+        #self.root.resizable(False, False)
         self.root.iconbitmap("assets/Icon.ico")
-        root.configure(bg = "#2e2e2e")
+        root.configure(bg = "#292929")
 
     def createWidgets(self):
         # Help Info Label
-        self.helpLabel = tk.Label(self.root, text="r = reset, s = save", font=tkFont.Font(family="assets/Lexend.ttf", size=20))
+        self.helpLabel = tk.Label(self.root, text="r = Reset, s = Save", font=tkFont.Font(family="assets/Lexend.ttf", size=20), foreground="#FFFFFF", background="#292929")
         self.helpLabel.pack()
         
         # Current Number Label
-        self.currentNumLabel = tk.Label(self.root, text="Current number: " + str(self.currentNum), font=('Arial', 10))
+        self.currentNumLabel = tk.Label(self.root, text="Current number: " + str(self.currentNum), font=('Arial', self.fontSize), foreground="#FFFFFF", background="#292929")
         self.currentNumLabel.pack()
 
         # Configure Columns
@@ -52,21 +53,24 @@ class AIDatasetCollector:
 
         # Create Buttons
         for i in range(10):
-            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda i=i: self.setCurrentNum(i))
+            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda i=i: self.setCurrentNum(i), background="#383838", borderwidth=0, activebackground="#5e5e5e", foreground="White", activeforeground="White")
             button.grid(row=i // 5, column=i % 5)
 
         self.inputButtomFrame.pack()
 
-        self.numInDirectoryButton = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("Arial", 10))
+        self.numInDirectoryButton = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("Arial", 10), foreground="White", background="#292929")
         self.numInDirectoryButton.pack()
 
-        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="light grey", borderwidth = 0, highlightthickness= 0)
+        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="#1f1f1f", borderwidth = 0, highlightthickness= 0, relief="sunken")
         self.drawingCanvas.pack()
 
-        self.trainModelButton = tk.Button(self.root, text= "Train Model", font=("Arial", self.fontSize))
+        self.trainModelButton = tk.Button(self.root, text= "Train Model", borderwidth=0, font=("Arial", self.fontSize), background="#383838", activebackground="#5e5e5e", foreground="White")
         self.trainModelButton.pack(pady = 10)
 
-        self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10))
+        self.toggleLightDarkButton = tk.Button(self.root, text = "Switch to Light Mode", background="#383838", activebackground="#5e5e5e", foreground="White", borderwidth=0, padx=5, pady=5)
+        self.toggleLightDarkButton.pack()
+
+        self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10), borderwidth=0)
         self.signatureLabel.pack(side="bottom")
 
 
@@ -102,7 +106,7 @@ class AIDatasetCollector:
         file_path = "dataset/" + str(self.currentNum) + "/"
 
         # finds the number of files in a given directory
-        # found on stack overflow
+        # found on stack ovecanvasrflow
         self.image_count = len(os.listdir(file_path))
 
         self.numInDirectoryButton.config(text="Images in directory: " + str(self.image_count))
