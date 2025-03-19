@@ -58,6 +58,9 @@ class AIDatasetCollector:
         self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="light grey", borderwidth = 0, highlightthickness= 0)
         self.drawingCanvas.pack()
 
+        self.trainModelButton = tk.Button(self.root, text= "Train Model", font=("Arial", 10))
+        self.trainModelButton.pack(pady = 10)
+
         self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10))
         self.signatureLabel.pack(side="bottom")
 
@@ -93,12 +96,16 @@ class AIDatasetCollector:
     def updateImagesInDirectory(self):
         file_path = "dataset/" + str(self.currentNum) + "/"
 
-        # idk why this works I found it on stack overflow
+        # finds the number of files in a given directory
+        # found on stack overflow
         self.image_count = len(os.listdir(file_path))
 
         self.numInDirectoryButton.config(text="Images in directory: " + str(self.image_count))
 
         self.root.after(100, self.updateImagesInDirectory)
+
+    def trainModel():
+        print("TBD")
 
 # create main window
 root = tk.Tk()
