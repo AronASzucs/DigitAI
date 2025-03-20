@@ -41,10 +41,6 @@ class AIDatasetCollector:
         # Help Info Label
         self.helpLabel = tk.Label(self.root, text="r = Reset, s = Save", font=tkFont.Font(family="assets/Lexend.ttf", size=20), foreground="#FFFFFF", background="#292929")
         self.helpLabel.pack()
-        
-        # Current Number Label
-        self.currentNumLabel = tk.Label(self.root, text="Current number: " + str(self.currentNum), font=('Arial', self.fontSize), foreground="#FFFFFF", background="#292929")
-        self.currentNumLabel.pack()
 
         # Configure Columns
         self.inputButtomFrame = tk.Frame(self.root)
@@ -52,9 +48,12 @@ class AIDatasetCollector:
             self.inputButtomFrame.columnconfigure(i, weight=1)
 
         # Create Buttons
+        self.buttons = {}
+
         for i in range(10):
-            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda i=i: self.setCurrentNum(i), background="#383838", borderwidth=0, activebackground="#5e5e5e", foreground="White", activeforeground="White")
+            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda i=i: self.change_number_button_color(i), background="#383838", borderwidth=0, activebackground="#5e5e5e", foreground="White", activeforeground="White")
             button.grid(row=i // 5, column=i % 5)
+            self.buttons[i] = button
 
         self.inputButtomFrame.pack()
 
@@ -64,7 +63,7 @@ class AIDatasetCollector:
         self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="#1f1f1f", borderwidth = 0, highlightthickness= 0, relief="sunken")
         self.drawingCanvas.pack()
 
-        self.trainModelButton = tk.Button(self.root, text= "Train Model", borderwidth=0, font=("Arial", self.fontSize), background="#383838", activebackground="#5e5e5e", foreground="White")
+        self.trainModelButton = tk.Button(self.root, text= "Train Model", borderwidth=0, font=("Arial", self.fontSize), background="#383838", activebackground="#5e5e5e", foreground="White", activeforeground="White")
         self.trainModelButton.pack(pady = 10)
 
         self.toggleLightDarkButton = tk.Button(self.root, text = "Switch to Light Mode", background="#383838", activebackground="#5e5e5e", foreground="White", borderwidth=0, padx=5, pady=5)
@@ -73,16 +72,18 @@ class AIDatasetCollector:
         self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10), borderwidth=0)
         self.signatureLabel.pack(side="bottom")
 
-
-    def setCurrentNum(self, num):
-        self.currentNum = num
-        # Update the current number label
-        self.currentNumLabel.config(text="Current number: " + str(self.currentNum))
-
     def canvasDraw(self, x, y):
         if (x >= 0 and y >= 0 and x <= self.imageDimensions and y <= self.imageDimensions):
             self.drawingCanvas.create_rectangle(x * (256 // self.imageDimensions), y * (256 // self.imageDimensions), (x * (256 // self.imageDimensions) + (256 // self.imageDimensions)), (y * (256 // self.imageDimensions) + (256 // self.imageDimensions)), fill = "black") 
             self.array[y,x] = 1
+
+    def change_number_button_color(self, num):
+        self.currentNum = num
+
+        for button in self.buttons.values():
+            button.config(background="#383838")
+
+        self.buttons[num].config(background = "#8cbfc2")
 
     def mouseDrag(self, event):
         x, y = event.x, event.y
