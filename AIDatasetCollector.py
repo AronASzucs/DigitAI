@@ -11,12 +11,30 @@ class AIDatasetCollector:
 
     def __init__(self, root):
 
+        # Dark Color Palette
+        # Dark Color Palette
+        self.colorhighlight = "#8cbfc2"
+        self.highlight = "#FFFFFF"
+        self.background = "#292929"
+        self.altbackground = "#383838"
+        self.activebackground = "#5e5e5e"
+        self.canvas_color = "#1f1f1f"
+
+        # Light Color Palette
+        self.light_colorhighlight = "Black"
+        self.light_highlight = "Black"
+        self.light_background = "White"
+        self.light_altbackground = "Gray"
+        self.light_activebackground = "Light Gray"
+        self.light_canvas_color = "White"
+
+        self.LightOrDark = 0 # 0 = dark mode, 1 = light mode
+
         self.imageDimensions = 16
         self.root = root
-        self.fontSize = 20
+        self.fontSize = 18
         self.currentNum = 0
         self.image_count = 0
-        self.LightOrDark = 0 # 0 = dark mode, 1 = light mode
         
         self.setupWindow()
         self.createWidgets()
@@ -39,51 +57,76 @@ class AIDatasetCollector:
 
     def createWidgets(self):
         # Help Info Label
-        self.helpLabel = tk.Label(self.root, text="r = Reset, s = Save", font=tkFont.Font(family="assets/Lexend.ttf", size=20), foreground="#FFFFFF", background="#292929")
+        self.helpLabel = tk.Label(self.root, text="r = Reset, s = Save", font=tkFont.Font(family="assets/Lexend.ttf", size=20), foreground=self.highlight, background=self.background)
         self.helpLabel.pack()
 
         # Configure Columns
         self.inputButtomFrame = tk.Frame(self.root)
-        for i in range(5):
+        for i in range(7):
             self.inputButtomFrame.columnconfigure(i, weight=1)
 
         # Create Buttons
         self.buttons = {}
 
         for i in range(10):
-            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda i=i: self.change_number_button_color(i), background="#383838", borderwidth=0, activebackground="#5e5e5e", foreground="White", activeforeground="White")
+            button = tk.Button(self.inputButtomFrame, text=str(i), font=("Arial", self.fontSize), command=lambda t=i: self.change_number_button_color(t), background=self.altbackground, borderwidth=0, activebackground=self.activebackground, foreground=self.highlight, activeforeground=self.highlight)
             button.grid(row=i // 5, column=i % 5)
             self.buttons[i] = button
 
-        self.inputButtomFrame.pack()
+        Button1 = tk.Button(self.inputButtomFrame, text = "8px", font=("Arial", self.fontSize),background=self.altbackground, borderwidth=0, activebackground=self.activebackground, foreground=self.highlight, activeforeground=self.highlight)
+        Button2 = tk.Button(self.inputButtomFrame, text = "16px",font=("Arial", self.fontSize), background=self.altbackground, borderwidth=0, activebackground=self.activebackground, foreground=self.highlight, activeforeground=self.highlight)
+        Button3 = tk.Button(self.inputButtomFrame, text = "28px", font=("Arial", self.fontSize),background=self.altbackground, borderwidth=0, activebackground=self.activebackground, foreground=self.highlight, activeforeground=self.highlight)
+        Button4 = tk.Button(self.inputButtomFrame, text = "32px",font=("Arial", self.fontSize), background=self.altbackground, borderwidth=0, activebackground=self.activebackground, foreground=self.highlight, activeforeground=self.highlight)
 
-        self.numInDirectoryButton = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("Arial", 10), foreground="White", background="#292929")
+        Button1.grid(row=0, column=5)
+        Button2.grid(row=0, column=6)
+        Button3.grid(row=1, column=5)
+        Button4.grid(row=1, column=6)
+
+
+        self.inputButtomFrame.pack()
+        self.change_number_button_color(0) #sets the 0 to be highlighted
+
+        self.numInDirectoryButton = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("Arial", 10), foreground="White", background=self.background)
         self.numInDirectoryButton.pack()
 
-        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg="#1f1f1f", borderwidth = 0, highlightthickness= 0, relief="sunken")
+        self.drawingCanvas = tk.Canvas(self.root, width=256, height=256, bg=self.canvas_color, borderwidth = 0, highlightthickness= 0, relief="sunken")
         self.drawingCanvas.pack()
 
-        self.trainModelButton = tk.Button(self.root, text= "Train Model", borderwidth=0, font=("Arial", self.fontSize), background="#383838", activebackground="#5e5e5e", foreground="White", activeforeground="White")
+        self.trainModelButton = tk.Button(self.root, text= "Train Model", borderwidth=0, font=("Arial", self.fontSize), background=self.altbackground, activebackground=self.activebackground, foreground=self.highlight, activeforeground=self.highlight)
         self.trainModelButton.pack(pady = 10)
 
-        self.toggleLightDarkButton = tk.Button(self.root, text = "Switch to Light Mode", background="#383838", activebackground="#5e5e5e", foreground="White", borderwidth=0, padx=5, pady=5)
+        self.toggleLightDarkButton = tk.Button(self.root, text = "Switch to Light Mode", command =self.changeColorPalette, background=self.altbackground, activebackground=self.activebackground, foreground=self.highlight, borderwidth=0, padx=5, pady=5)
         self.toggleLightDarkButton.pack()
 
-        self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10), borderwidth=0)
+        self.signatureLabel = tk.Label(self.root, text="Made by Aron Szucs", font=("Lucida Calligraphy", 10), borderwidth=0, background=self.background, foreground=self.highlight)
         self.signatureLabel.pack(side="bottom")
 
     def canvasDraw(self, x, y):
         if (x >= 0 and y >= 0 and x <= self.imageDimensions and y <= self.imageDimensions):
-            self.drawingCanvas.create_rectangle(x * (256 // self.imageDimensions), y * (256 // self.imageDimensions), (x * (256 // self.imageDimensions) + (256 // self.imageDimensions)), (y * (256 // self.imageDimensions) + (256 // self.imageDimensions)), fill = "black") 
+            self.drawingCanvas.create_rectangle(x * (256 // self.imageDimensions), y * (256 // self.imageDimensions), (x * (256 // self.imageDimensions) + (256 // self.imageDimensions)), (y * (256 // self.imageDimensions) + (256 // self.imageDimensions)), fill = "white") 
             self.array[y,x] = 1
 
     def change_number_button_color(self, num):
         self.currentNum = num
 
         for button in self.buttons.values():
-            button.config(background="#383838")
+            button.config(background=self.altbackground)
 
-        self.buttons[num].config(background = "#8cbfc2")
+        self.buttons[num].config(background = self.colorhighlight)
+
+    def changeColorPalette(self):
+
+        if self.LightOrDark == 0:
+            self.trainModelButton.configure(background=self.light_altbackground, highlightcolor=self.light_highlight)
+            self.root.config(background=self.light_background)
+            print("now light")
+            self.LightOrDark = 1
+        else:
+            self.trainModelButton.configure(background=self.altbackground)
+            self.root.config(background=self.background)
+            print("now dark")
+            self.LightOrDark = 0
 
     def mouseDrag(self, event):
         x, y = event.x, event.y
