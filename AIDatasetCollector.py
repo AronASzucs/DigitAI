@@ -1,8 +1,10 @@
 import tkinter as tk
+from tkinter import filedialog
 import numpy
 from PIL import Image
 import os, os.path
 from ctypes import windll
+from Model import NumberModel # From Model.py
 
 # The AI Dataset collection class
 class AIDatasetCollector:
@@ -18,7 +20,7 @@ class AIDatasetCollector:
         self.canvas_color = "#1f1f1f"
 
         # Light Color Palette
-        self.light_color_highlight = "Pink"
+        self.light_color_highlight = "#6fa688"
         self.light_highlight = "Black"
         self.light_background = "White"
         self.light_alt_background = "Light Gray"
@@ -43,6 +45,9 @@ class AIDatasetCollector:
 
         # define array
         self.array = numpy.zeros((self.image_dimensions, self.image_dimensions))
+
+        # create model class
+        self.model = NumberModel()
 
     def setup_window(self):
         windll.shcore.SetProcessDpiAwareness(1)
@@ -85,11 +90,18 @@ class AIDatasetCollector:
         self.input_buttom_frame.pack()
         self.change_number_button_color(0) #sets the 0 to be highlighted
 
+        # Images in directory label
         self.num_in_directory_label = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("System", 10), foreground="White", background=self.background)
         self.num_in_directory_label.pack(pady = 10)
 
+        # Drawing Canvas
         self.drawing_canvas = tk.Canvas(self.root, width=256, height=256, bg=self.canvas_color, borderwidth = 0, highlightthickness= 0, relief="sunken")
         self.drawing_canvas.pack()
+
+        # Predicted Number Label
+
+        self.prediction_label = tk.Label(self.root, text = "Load/Train a Model to Predict Numbers", font=("System", self.font_size), foreground=self.highlight, background=self.background)
+        self.prediction_label.pack()
 
         # Bottom button frame w/ Train Model, Save Model, and Load Model
         self.bottom_button_frame = tk.Frame(self.root, background=self.background)
@@ -104,7 +116,6 @@ class AIDatasetCollector:
 
         self.load_model_button = tk.Button(self.bottom_button_frame, text= "Load Model", command=self.load_model, borderwidth=0, font=("System", self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.load_model_button.grid(row = 0, column=2, padx=5)
-
 
         self.bottom_button_frame.pack(pady=20)
 
@@ -156,7 +167,7 @@ class AIDatasetCollector:
             self.save_model_button.configure(background=self.light_alt_background, foreground=self.light_highlight)
             self.bottom_button_frame.configure(background=self.light_background)
             self.signature_label.configure(background=self.light_background, foreground=self.light_highlight)
-            self.toggle_light_dark_button.configure(background=self.light_alt_background, foreground=self.light_highlight)
+            self.toggle_light_dark_button.configure(background=self.light_alt_background, foreground=self.light_highlight, text = "Switch to Dark Mode")
             self.help_label.configure(background=self.light_background, foreground=self.light_highlight)
             self.num_in_directory_label.configure(background=self.light_background, foreground=self.light_highlight)
             self.input_buttom_frame.configure(background=self.light_background)
@@ -177,7 +188,7 @@ class AIDatasetCollector:
             self.save_model_button.configure(background=self.alt_background, foreground=self.highlight)
             self.bottom_button_frame.configure(background=self.background)
             self.signature_label.configure(background=self.background, foreground=self.color_highlight)
-            self.toggle_light_dark_button.configure(background=self.alt_background, foreground=self.highlight)
+            self.toggle_light_dark_button.configure(background=self.alt_background, foreground=self.highlight, text = "Switch to Light Mode")
             self.help_label.configure(background=self.background, foreground=self.highlight)
             self.num_in_directory_label.configure(background=self.background, foreground=self.highlight)
             self.input_buttom_frame.configure(background=self.background)
@@ -241,7 +252,9 @@ class AIDatasetCollector:
         print("trained model")
 
     def load_model(self):
-        print("loaded model")
+        # load file
+        filepath = filedialog.askopenfilename(filetypes=[("Model files", "*.h5")])
+
 
     def save_model(self):
         print("saved model")
@@ -249,8 +262,17 @@ class AIDatasetCollector:
 # create main window
 root = tk.Tk()
 
-# instantiate the app
+# instantiate the  
 app = AIDatasetCollector(root)
 
 # start the main loop
 root.mainloop()
+
+'''
+    ___                        _____                      
+   /   |  _________  ____     / ___/____  __  ____________
+  / /| | / ___/ __ \/ __ \    \__ \/_  / / / / / ___/ ___/
+ / ___ |/ /  / /_/ / / / /   ___/ / / /_/ /_/ / /__(__  ) 
+/_/  |_/_/   \____/_/ /_/   /____/ /___/\__,_/\___/____/  
+                                                          
+'''
