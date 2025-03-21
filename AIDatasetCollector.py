@@ -18,7 +18,7 @@ class AIDatasetCollector:
         self.canvas_color = "#1f1f1f"
 
         # Light Color Palette
-        self.light_color_highlight = "Black"
+        self.light_color_highlight = "Pink"
         self.light_highlight = "Black"
         self.light_background = "White"
         self.light_alt_background = "Light Gray"
@@ -125,31 +125,32 @@ class AIDatasetCollector:
         self.current_num = num
 
         for button in self.buttons.values():
-            button.config(background=self.alt_background)
+            button.config(background=self.alt_background, foreground=self.highlight) if self.light_or_dark == 0 else button.config(background=self.light_alt_background, foreground=self.light_highlight)
 
-        self.buttons[num].config(background = self.color_highlight)
+        self.buttons[num].config(background = self.color_highlight) if self.light_or_dark == 0 else self.buttons[num].config(background = self.light_color_highlight)
 
-    def change_img_size(self,num):
-        self.button_8px.config(background=self.alt_background)
-        self.button_16px.config(background=self.alt_background)
-        self.button_32px.config(background=self.alt_background)
-        self.button_64px.config(background=self.alt_background)
+    def change_img_size(self,num): #also chhanges the color of the img size buttons
+        self.button_8px.config(background=self.alt_background, foreground=self.highlight) if self.light_or_dark == 0 else self.button_8px.config(background=self.light_alt_background, foreground=self.light_highlight)
+        self.button_16px.config(background=self.alt_background, foreground=self.highlight) if self.light_or_dark == 0 else self.button_16px.config(background=self.light_alt_background, foreground=self.light_highlight)
+        self.button_32px.config(background=self.alt_background, foreground=self.highlight) if self.light_or_dark == 0 else self.button_32px.config(background=self.light_alt_background, foreground=self.light_highlight)
+        self.button_64px.config(background=self.alt_background, foreground=self.highlight) if self.light_or_dark == 0 else self.button_64px.config(background=self.light_alt_background, foreground=self.light_highlight)
         self.image_dimensions = num
         self.reset(self)
 
         print(self.image_dimensions)
 
         if num == 8:
-            self.button_8px.config(background=self.color_highlight)
+            self.button_8px.config(background=self.color_highlight) if self.light_or_dark == 0 else self.button_8px.config(background=self.light_color_highlight)
         elif num == 16:
-            self.button_16px.config(background=self.color_highlight)
+            self.button_16px.config(background=self.color_highlight) if self.light_or_dark == 0 else self.button_16px.config(background=self.light_color_highlight)
         elif num == 32:
-            self.button_32px.config(background=self.color_highlight)
+            self.button_32px.config(background=self.color_highlight) if self.light_or_dark == 0 else self.button_32px.config(background=self.light_color_highlight)
         elif num == 64:
-            self.button_64px.config(background=self.color_highlight)
+            self.button_64px.config(background=self.color_highlight) if self.light_or_dark == 0 else self.button_64px.config(background=self.light_color_highlight)
 
     def change_color_palette(self):
         if self.light_or_dark == 0: # in dark mode
+            self.light_or_dark = 1
             self.train_model_button.configure(background=self.light_alt_background, foreground=self.light_highlight)
             self.load_model_button.configure(background=self.light_alt_background, foreground=self.light_highlight)
             self.save_model_button.configure(background=self.light_alt_background, foreground=self.light_highlight)
@@ -158,11 +159,19 @@ class AIDatasetCollector:
             self.toggle_light_dark_button.configure(background=self.light_alt_background, foreground=self.light_highlight)
             self.help_label.configure(background=self.light_background, foreground=self.light_highlight)
             self.num_in_directory_label.configure(background=self.light_background, foreground=self.light_highlight)
+            self.input_buttom_frame.configure(background=self.light_background)
+
+            for btn in self.buttons:
+                self.buttons[btn].configure(background=self.light_alt_background, foreground=self.light_highlight)
+
+            self.change_img_size(self.image_dimensions)
+            self.change_number_button_color(self.current_num)
 
             self.root.config(background=self.light_background)
             print("now light mode")
-            self.light_or_dark = 1
+            
         else: # in light mode
+            self.light_or_dark = 0
             self.train_model_button.configure(background=self.alt_background, foreground=self.highlight)
             self.load_model_button.configure(background=self.alt_background, foreground=self.highlight)
             self.save_model_button.configure(background=self.alt_background, foreground=self.highlight)
@@ -171,10 +180,13 @@ class AIDatasetCollector:
             self.toggle_light_dark_button.configure(background=self.alt_background, foreground=self.highlight)
             self.help_label.configure(background=self.background, foreground=self.highlight)
             self.num_in_directory_label.configure(background=self.background, foreground=self.highlight)
+            self.input_buttom_frame.configure(background=self.background)
+
+            self.change_img_size(self.image_dimensions)
+            self.change_number_button_color(self.current_num)
 
             self.root.config(background=self.background)
             print("now dark mode")
-            self.light_or_dark = 0
 
     def mouse_drag(self, event):
         x, y = event.x, event.y
