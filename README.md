@@ -1,5 +1,4 @@
-# HandwrittenAI - Dataset Collection & Model Training
-# Written by Aron Szucs
+# HandwrittenAI - Dataset Collection & Model Training by Aron Szucs
 
 HandwrittenAI is a tool for collecting a handwritten digit dataset and training a TensorFlow model for recognition. This is my first "AI" related project. 
 
