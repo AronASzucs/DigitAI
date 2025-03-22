@@ -23,3 +23,4 @@ class NumberModel:
 
     def predict_num(self, numArray):
         return 0    
+    
