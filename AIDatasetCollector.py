@@ -34,6 +34,7 @@ class AIDatasetCollector:
         self.font_size = 18
         self.current_num = 0
         self.image_count = 0
+        self.model_current_mode = 0 # 0 = non active, 8 = 8px, 16 = 16px, 32 = 32px, 64 = 64px, if image_dimensions =/= model_current_mode, thats bad.
         
         self.setup_window()
         self.create_widgets()
