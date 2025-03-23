@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 import numpy
+import time
 from PIL import Image
 import os, os.path
 from ctypes import windll
@@ -100,7 +101,6 @@ class AIDatasetCollector:
         self.drawing_canvas.pack()
 
         # Predicted Number Label
-
         self.prediction_label = tk.Label(self.root, text = "Load/Train a Model to Predict Numbers", font=("System", self.font_size), foreground=self.highlight, background=self.background)
         self.prediction_label.pack()
 
@@ -125,6 +125,8 @@ class AIDatasetCollector:
 
         self.signature_label = tk.Label(self.root, text="Made by Aron Szucs", font=("System", 10), borderwidth=0, background=self.background, foreground=self.color_highlight)
         self.signature_label.pack(side="bottom")
+
+        self.message_label = tk.Label(self.root, text = "ERROR!", foreground=self.color_highlight, font=("System", self.font_size), background="Black")
 
         self.change_img_size(16) # sets 16 to be highlighted
 
@@ -200,6 +202,11 @@ class AIDatasetCollector:
             self.root.config(background=self.background)
             print("now dark mode")
 
+    def show_error(self, error_msg):
+        self.message_label.configure(foreground="Pink", text=error_msg)
+        self.message_label.place(x=300, y=300, anchor="center")
+        self.message_label.after(2000, self.message_label.place_forget) #2000ms = 2s
+
     def mouse_drag(self, event):
         x, y = event.x, event.y
         self.canvas_draw(x // (256 // self.image_dimensions) , y // (256 // self.image_dimensions))
@@ -250,12 +257,13 @@ class AIDatasetCollector:
         self.root.after(100, self.update_images_in_directory)
 
     def train_model(self):
-        print("trained model")
-
+        self.model.train_model(self.image_dimensions, self)
+        
     def load_model(self):
+        self.show_error()
         # load file
-        filepath = filedialog.askopenfilename(filetypes=[("Model files", "*.h5")])
-
+        filepath = filedialog.askopenfilename(filetypes=[(".keras", "*.keras")])
+        self.model.load_model(filepath)
 
     def save_model(self):
         print("saved model")
