@@ -1,9 +1,13 @@
 import tensorflow as tf
 from tensorflow import keras
 import os
+import numpy as np
+import time
 
 class NumberModel:
     def __init__(self):
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Hides info, warnings, and errors
+
         print("Made Model Object")
 
         self.batch_size = 32 
@@ -70,9 +74,10 @@ class NumberModel:
         self.model_img_dim = image_dim
 
     def predict_num(self, numArray):
-        if numArray.shape != self.model_img_dim:
+        if numArray.shape != (self.model_img_dim, self.model_img_dim):
             print("ERROR: Model dimension =/= image dimension")
             return
-
-        prediction = self.model.predict(numArray)
-        return 0    
+        
+        prediction = self.model.predict(np.expand_dims(numArray, axis=0))
+        return(np.argmax(prediction))
+        

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import numpy
 import time
+import threading
 from PIL import Image
 import os, os.path
 from ctypes import windll
@@ -19,7 +20,6 @@ class AIDatasetCollector:
         self.alt_background = "#383838"
         self.active_background = "#5e5e5e"
         self.canvas_color = "#1f1f1f"
-
         # Light Color Palette
         self.light_color_highlight = "#6fa688"
         self.light_highlight = "Black"
@@ -27,12 +27,17 @@ class AIDatasetCollector:
         self.light_alt_background = "Light Gray"
         self.light_active_background = "Light Gray"
         self.light_canvas_color = "White"
-
         self.light_or_dark = 0 # 0 = dark mode, 1 = light mode
+
+        self.screen_height = root.winfo_screenheight()
+        self.screen_scalar = (self.screen_height / 1080) * 2
+        self.canvas_size = int(256 * self.screen_scalar)
 
         self.image_dimensions = 16
         self.root = root
-        self.font_size = 18
+        self.font_size = int(18 * self.screen_scalar)
+        self.font_size_small = int(10 * self.screen_scalar)
+        self.set_font = "Segoe UI"
         self.current_num = 0
         self.image_count = 0
         self.model_current_mode = 0 # 0 = non active, 8 = 8px, 16 = 16px, 32 = 32px, 64 = 64px, if image_dimensions =/= model_current_mode, thats bad.
@@ -53,15 +58,16 @@ class AIDatasetCollector:
 
     def setup_window(self):
         windll.shcore.SetProcessDpiAwareness(1)
-        self.root.geometry("600x600")
+        self.window_size = int(600 * self.screen_scalar)
+        self.root.geometry(str(self.window_size) + "x" + str(self.window_size))
         self.root.title("Handwritten Number AI collection and model")
         #self.root.resizable(False, False)
         self.root.iconbitmap("assets/Icon.ico")
-        root.configure(bg = "#292929")
+        root.configure(bg = self.background)
 
     def create_widgets(self):
         # Help Info Label
-        self.help_label = tk.Label(self.root, text="r = Reset Canvas, s = Save Img", font=("System", self.font_size), foreground=self.highlight, background=self.background)
+        self.help_label = tk.Label(self.root, text="r = Reset Canvas, s = Save Img", font=(self.set_font, self.font_size), foreground=self.highlight, background=self.background)
         self.help_label.pack()
 
         # Configure Columns
@@ -73,35 +79,35 @@ class AIDatasetCollector:
         self.buttons = {}
 
         for i in range(10):
-            button = tk.Button(self.input_buttom_frame, text=str(i), font=("System", self.font_size), command=lambda t=i: self.change_number_button_color(t), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+            button = tk.Button(self.input_buttom_frame, text=str(i), font=(self.set_font, self.font_size), command=lambda t=i: self.change_number_button_color(t), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
             button.grid(row=i // 5, column=i % 5)
             self.buttons[i] = button
 
-        self.button_8px = tk.Button(self.input_buttom_frame, text = " 8px ", font=("System", self.font_size), command=lambda: self.change_img_size(8), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.button_8px = tk.Button(self.input_buttom_frame, text = " 8px ", font=(self.set_font, self.font_size), command=lambda: self.change_img_size(8), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.button_8px.grid(padx=(20,0), row=0, column=6)
 
-        self.button_16px = tk.Button(self.input_buttom_frame, text = "16px", font=("System", self.font_size), command=lambda: self.change_img_size(16), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.button_16px = tk.Button(self.input_buttom_frame, text = "16px", font=(self.set_font, self.font_size), command=lambda: self.change_img_size(16), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.button_16px.grid(row=0, column=7)
 
-        self.button_32px = tk.Button(self.input_buttom_frame, text = "32px", font=("System", self.font_size), command=lambda: self.change_img_size(32),background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.button_32px = tk.Button(self.input_buttom_frame, text = "32px", font=(self.set_font, self.font_size), command=lambda: self.change_img_size(32),background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.button_32px.grid(padx=(20,0), row=1, column=6)
 
-        self.button_64px = tk.Button(self.input_buttom_frame, text = "64px", font=("System", self.font_size), command=lambda: self.change_img_size(64),background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.button_64px = tk.Button(self.input_buttom_frame, text = "64px", font=(self.set_font, self.font_size), command=lambda: self.change_img_size(64),background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.button_64px.grid(row=1, column=7)
             
         self.input_buttom_frame.pack()
         self.change_number_button_color(0) #sets the 0 to be highlighted
 
         # Images in directory label
-        self.num_in_directory_label = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=("System", 10), foreground="White", background=self.background)
+        self.num_in_directory_label = tk.Label(self.root, text="Images in directory: " + str(self.image_count), font=(self.set_font, self.font_size_small), foreground="White", background=self.background)
         self.num_in_directory_label.pack(pady = 10)
 
         # Drawing Canvas
-        self.drawing_canvas = tk.Canvas(self.root, width=256, height=256, bg=self.canvas_color, borderwidth = 0, highlightthickness= 0, relief="sunken")
+        self.drawing_canvas = tk.Canvas(self.root, width=self.canvas_size, height=self.canvas_size, bg=self.canvas_color, borderwidth = 0, highlightthickness= 0, relief="sunken")
         self.drawing_canvas.pack()
 
         # Predicted Number Label
-        self.prediction_label = tk.Label(self.root, text = "Load/Train a Model to Predict Numbers", font=("System", self.font_size), foreground=self.highlight, background=self.background)
+        self.prediction_label = tk.Label(self.root, text = "Load/Train a Model to Predict Numbers", font=(self.set_font, self.font_size), foreground=self.highlight, background=self.background)
         self.prediction_label.pack()
 
         # Bottom button frame w/ Train Model, Save Model, and Load Model
@@ -109,31 +115,40 @@ class AIDatasetCollector:
         for i in range (3):
             self.bottom_button_frame.columnconfigure(i,weight =1)
 
-        self.train_model_button = tk.Button(self.bottom_button_frame, text= "Train Model", command=self.train_model, borderwidth=0, font=("System", self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.train_model_button = tk.Button(self.bottom_button_frame, text= "Train Model", command=self.train_model, borderwidth=0, font=(self.set_font, self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.train_model_button.grid(row = 0, column=0,padx=5)
 
-        self.save_model_button = tk.Button(self.bottom_button_frame, text= "Save Model", command=self.save_model, borderwidth=0, font=("System", self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.save_model_button = tk.Button(self.bottom_button_frame, text= "Save Model", command=self.save_model, borderwidth=0, font=(self.set_font, self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.save_model_button.grid(row = 0, column=1, padx=5)
 
-        self.load_model_button = tk.Button(self.bottom_button_frame, text= "Load Model", command=self.load_model, borderwidth=0, font=("System", self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
+        self.load_model_button = tk.Button(self.bottom_button_frame, text= "Load Model", command=self.load_model, borderwidth=0, font=(self.set_font, self.font_size), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.load_model_button.grid(row = 0, column=2, padx=5)
 
         self.bottom_button_frame.pack(pady=20)
 
-        self.toggle_light_dark_button = tk.Button(self.root, text = "Switch to Light Mode", command=self.change_color_palette, padx=5, pady=5, font=("System", 10), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight, borderwidth=0)
+        self.toggle_light_dark_button = tk.Button(self.root, text = "Switch to Light Mode", command=self.change_color_palette, padx=5, pady=5, font=(self.set_font, 10), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight, borderwidth=0)
         self.toggle_light_dark_button.pack()
 
-        self.signature_label = tk.Label(self.root, text="Made by Aron Szucs", font=("System", 10), borderwidth=0, background=self.background, foreground=self.color_highlight)
+        self.signature_label = tk.Label(self.root, text="Made by Aron Szucs", font=(self.set_font, 10), borderwidth=0, background=self.background, foreground=self.color_highlight)
         self.signature_label.pack(side="bottom")
 
-        self.message_label = tk.Label(self.root, text = "ERROR!", foreground=self.color_highlight, font=("System", self.font_size), background="Black")
+        self.message_label = tk.Label(self.root, text = "ERROR!", foreground=self.color_highlight, font=(self.set_font, self.font_size), background="Black")
 
         self.change_img_size(16) # sets 16 to be highlighted
 
     def canvas_draw(self, x, y):
         if (x >= 0 and y >= 0 and x <= self.image_dimensions and y <= self.image_dimensions):
-            self.drawing_canvas.create_rectangle(x * (256 // self.image_dimensions), y * (256 // self.image_dimensions), (x * (256 // self.image_dimensions) + (256 // self.image_dimensions)), (y * (256 // self.image_dimensions) + (256 // self.image_dimensions)), fill = "white") 
-            self.array[y,x] = 1
+            if self.array[y,x] == 0:
+                self.drawing_canvas.create_rectangle(x * (self.canvas_size // self.image_dimensions),
+                                                     y * (self.canvas_size // self.image_dimensions),
+                                                     (x * (self.canvas_size // self.image_dimensions) + (self.canvas_size // self.image_dimensions)),
+                                                     (y * (self.canvas_size // self.image_dimensions) + (self.canvas_size // self.image_dimensions)),
+                                                     fill = "white") 
+                self.array[y,x] = 1
+
+                # Update prediction if model is loaded
+                if self.model_current_mode != 0:
+                    self.update_prediction()
 
     def change_number_button_color(self, num):
         self.current_num = num
@@ -207,11 +222,15 @@ class AIDatasetCollector:
         self.message_label.place(x=300, y=300, anchor="center")
         self.message_label.after(2000, self.message_label.place_forget) #2000ms = 2s
 
+    def update_prediction(self):
+        t1 = threading.Thread(target=lambda: self.prediction_label.configure(text="Predicted number: " + str(self.model.predict_num(self.array))))
+        t1.start()
+
     def mouse_drag(self, event):
         x, y = event.x, event.y
-        self.canvas_draw(x // (256 // self.image_dimensions) , y // (256 // self.image_dimensions))
-        print (str(x // (256 // self.image_dimensions)) + " " + str(y // (256 // self.image_dimensions)))
-
+        t2 = threading.Thread(target=self.canvas_draw(x // (self.canvas_size // self.image_dimensions) , y // (self.canvas_size // self.image_dimensions)))
+        t2.start()
+        
     def reset(self, event):
         self.drawing_canvas.delete("all")
         self.array = numpy.zeros((self.image_dimensions, self.image_dimensions))
@@ -249,15 +268,15 @@ class AIDatasetCollector:
             self.image_count = 0
         else:
             # finds the number of files in a given directory
-            # found on stack ovecanvasrflow
             self.image_count = len(os.listdir(file_path))
 
         self.num_in_directory_label.config(text="Images in directory: " + str(self.image_count))
 
-        self.root.after(100, self.update_images_in_directory)
+        self.root.after(10, self.update_images_in_directory)
 
     def train_model(self):
         self.model.train_model(self.image_dimensions, self)
+        self.model_current_mode = self.image_dimensions
         
     def load_model(self):
         self.show_error()
@@ -267,6 +286,9 @@ class AIDatasetCollector:
 
     def save_model(self):
         print("saved model")
+
+
+
 
 # create main window
 root = tk.Tk()
