@@ -6,10 +6,10 @@ import threading
 from PIL import Image
 import os, os.path
 from ctypes import windll
-from Model import NumberModel # From Model.py
+from model import NumberModel # From Model.py
 
 # The AI Dataset collection class
-class AIDatasetCollector:
+class Window:
 
     def __init__(self, root):
 
@@ -37,7 +37,7 @@ class AIDatasetCollector:
         self.root = root
         self.font_size = int(18 * self.screen_scalar)
         self.font_size_small = int(10 * self.screen_scalar)
-        self.set_font = "Segoe UI"
+        self.set_font = "Arial Rounded MT Bold"
         self.current_num = 0
         self.image_count = 0
         self.model_current_mode = 0 # 0 = non active, 8 = 8px, 16 = 16px, 32 = 32px, 64 = 64px, if image_dimensions =/= model_current_mode, thats bad.
@@ -126,10 +126,10 @@ class AIDatasetCollector:
 
         self.bottom_button_frame.pack(pady=20)
 
-        self.toggle_light_dark_button = tk.Button(self.root, text = "Switch to Light Mode", command=self.change_color_palette, padx=5, pady=5, font=(self.set_font, 10), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight, borderwidth=0)
+        self.toggle_light_dark_button = tk.Button(self.root, text = "Switch to Light Mode", command=self.change_color_palette, padx=5, pady=5, font=(self.set_font, self.font_size_small), background=self.alt_background, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight, borderwidth=0)
         self.toggle_light_dark_button.pack()
 
-        self.signature_label = tk.Label(self.root, text="Made by Aron Szucs", font=(self.set_font, 10), borderwidth=0, background=self.background, foreground=self.color_highlight)
+        self.signature_label = tk.Label(self.root, text="Made by Aron Szucs", font=(self.set_font, self.font_size_small), borderwidth=0, background=self.background, foreground=self.color_highlight)
         self.signature_label.pack(side="bottom")
 
         self.message_label = tk.Label(self.root, text = "ERROR!", foreground=self.color_highlight, font=(self.set_font, self.font_size), background="Black")
@@ -219,7 +219,13 @@ class AIDatasetCollector:
 
     def show_error(self, error_msg):
         self.message_label.configure(foreground="Pink", text=error_msg)
-        self.message_label.place(x=300, y=300, anchor="center")
+        self.message_label.place(relx=0.5, rely=0.5, anchor="center")
+
+        self.message_label.after(2000, self.message_label.place_forget) #2000ms = 2s
+
+    def show_mesage(self, msg):
+        self.message_label.configure(foreground="Pink", text=msg)
+        self.message_label.place(relx=0.5, rely=0.5, anchor="center")
         self.message_label.after(2000, self.message_label.place_forget) #2000ms = 2s
 
     def update_prediction(self):
@@ -288,17 +294,14 @@ class AIDatasetCollector:
         print("saved model")
 
 
-
-
-# create main window
+# Create main window
 root = tk.Tk()
 
-# instantiate the  
-app = AIDatasetCollector(root)
+# Instantiate the Window class, passing the root as an argument
+app = Window(root)
 
-# start the main loop
+# Start the main loop
 root.mainloop()
-
 '''
     ___                        _____                      
    /   |  _________  ____     / ___/____  __  ____________
