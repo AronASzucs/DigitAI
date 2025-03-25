@@ -17,8 +17,10 @@ class NumberModel:
         self.model = None
 
     def load_model(self,filepath):
-        print("loaded model")
+        self.model = tf.keras.models.load_model(filepath)
+        self.model_img_dim = self.model.input_shape[1]
 
+        print("loaded model")
 
     def save_model(self):
         print("saved model")

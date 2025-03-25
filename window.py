@@ -10,7 +10,6 @@ from model import NumberModel # From Model.py
 
 # The AI Dataset collection class
 class Window:
-
     def __init__(self, root):
 
         # Dark Color Palette
@@ -35,8 +34,8 @@ class Window:
 
         self.image_dimensions = 16
         self.root = root
-        self.font_size = int(18 * self.screen_scalar)
-        self.font_size_small = int(10 * self.screen_scalar)
+        self.font_size = int(20 * self.screen_scalar)
+        self.font_size_small = int(13 * self.screen_scalar)
         self.set_font = "Arial Rounded MT Bold"
         self.current_num = 0
         self.image_count = 0
@@ -84,7 +83,7 @@ class Window:
             self.buttons[i] = button
 
         self.button_8px = tk.Button(self.input_buttom_frame, text = " 8px ", font=(self.set_font, self.font_size), command=lambda: self.change_img_size(8), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
-        self.button_8px.grid(padx=(20,0), row=0, column=6)
+        self.button_8px.grid(padx=(20 ,0), row=0, column=6)
 
         self.button_16px = tk.Button(self.input_buttom_frame, text = "16px", font=(self.set_font, self.font_size), command=lambda: self.change_img_size(16), background=self.alt_background, borderwidth=0, activebackground=self.active_background, foreground=self.highlight, activeforeground=self.highlight)
         self.button_16px.grid(row=0, column=7)
@@ -177,6 +176,10 @@ class Window:
         elif num == 64:
             self.button_64px.config(background=self.color_highlight) if self.light_or_dark == 0 else self.button_64px.config(background=self.light_color_highlight)
 
+        # Reset model state
+        if self.model_current_mode != 0:
+            self.unload_model()
+
     def change_color_palette(self):
         if self.light_or_dark == 0: # in dark mode
             self.light_or_dark = 1
@@ -223,8 +226,8 @@ class Window:
 
         self.message_label.after(2000, self.message_label.place_forget) #2000ms = 2s
 
-    def show_mesage(self, msg):
-        self.message_label.configure(foreground="Pink", text=msg)
+    def show_message(self, msg):
+        self.message_label.configure(foreground=self.highlight, text=msg)
         self.message_label.place(relx=0.5, rely=0.5, anchor="center")
         self.message_label.after(2000, self.message_label.place_forget) #2000ms = 2s
 
@@ -285,10 +288,16 @@ class Window:
         self.model_current_mode = self.image_dimensions
         
     def load_model(self):
-        self.show_error()
         # load file
         filepath = filedialog.askopenfilename(filetypes=[(".keras", "*.keras")])
         self.model.load_model(filepath)
+        self.model_current_mode = 16
+
+    def unload_model(self):
+        self.model_current_mode = 0
+        print("Unloaded current model")
+        self.show_message("Unloaded current model")
+        self.prediction_label.configure(text = "Load/Train a Model to Predict Numbers")
 
     def save_model(self):
         print("saved model")
